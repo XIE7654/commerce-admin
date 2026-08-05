@@ -482,3 +482,168 @@ export const AreaLevelEnum = {
   CITY: 2, // 市
   DISTRICT: 3 // 区
 }
+
+// ========== AMAZON - 亚马逊销售区域 ==========
+/**
+ * Amazon SP-API 销售区域端点
+ */
+export const AmazonSalesRegionEnum = {
+  NORTH_AMERICA: {
+    endpoint: 'https://sellingpartnerapi-na.amazon.com',
+    awsRegion: 'us-east-1'
+  },
+  EUROPE: {
+    endpoint: 'https://sellingpartnerapi-eu.amazon.com',
+    awsRegion: 'eu-west-1'
+  },
+  FAR_EAST: {
+    endpoint: 'https://sellingpartnerapi-fe.amazon.com',
+    awsRegion: 'us-west-2'
+  }
+} as const
+
+/**
+ * Amazon Marketplace ID
+ *
+ * 使用国家代码作为 key，例如 AmazonMarketplaceEnum.US.marketplaceId。
+ */
+export const AmazonMarketplaceEnum = {
+  CA: {
+    country: 'Canada',
+    countryCode: 'CA',
+    marketplaceId: 'A2EUQ1WTGCTBG2',
+    salesRegion: AmazonSalesRegionEnum.NORTH_AMERICA
+  },
+  US: {
+    country: 'United States of America',
+    countryCode: 'US',
+    marketplaceId: 'ATVPDKIKX0DER',
+    salesRegion: AmazonSalesRegionEnum.NORTH_AMERICA
+  },
+  MX: {
+    country: 'Mexico',
+    countryCode: 'MX',
+    marketplaceId: 'A1AM78C64UM0Y8',
+    salesRegion: AmazonSalesRegionEnum.NORTH_AMERICA
+  },
+  BR: {
+    country: 'Brazil',
+    countryCode: 'BR',
+    marketplaceId: 'A2Q3Y263D00KWC',
+    salesRegion: AmazonSalesRegionEnum.NORTH_AMERICA
+  },
+  IE: {
+    country: 'Ireland',
+    countryCode: 'IE',
+    marketplaceId: 'A28R8C7NBKEWEA',
+    salesRegion: AmazonSalesRegionEnum.EUROPE
+  },
+  ES: {
+    country: 'Spain',
+    countryCode: 'ES',
+    marketplaceId: 'A1RKKUPIHCS9HS',
+    salesRegion: AmazonSalesRegionEnum.EUROPE
+  },
+  UK: {
+    country: 'United Kingdom',
+    countryCode: 'UK',
+    marketplaceId: 'A1F83G8C2ARO7P',
+    salesRegion: AmazonSalesRegionEnum.EUROPE
+  },
+  FR: {
+    country: 'France',
+    countryCode: 'FR',
+    marketplaceId: 'A13V1IB3VIYZZH',
+    salesRegion: AmazonSalesRegionEnum.EUROPE
+  },
+  BE: {
+    country: 'Belgium',
+    countryCode: 'BE',
+    marketplaceId: 'AMEN7PMS3EDWL',
+    salesRegion: AmazonSalesRegionEnum.EUROPE
+  },
+  NL: {
+    country: 'Netherlands',
+    countryCode: 'NL',
+    marketplaceId: 'A1805IZSGTT6HS',
+    salesRegion: AmazonSalesRegionEnum.EUROPE
+  },
+  DE: {
+    country: 'Germany',
+    countryCode: 'DE',
+    marketplaceId: 'A1PA6795UKMFR9',
+    salesRegion: AmazonSalesRegionEnum.EUROPE
+  },
+  IT: {
+    country: 'Italy',
+    countryCode: 'IT',
+    marketplaceId: 'APJ6JRA9NG5V4',
+    salesRegion: AmazonSalesRegionEnum.EUROPE
+  },
+  SE: {
+    country: 'Sweden',
+    countryCode: 'SE',
+    marketplaceId: 'A2NODRKZP88ZB9',
+    salesRegion: AmazonSalesRegionEnum.EUROPE
+  },
+  ZA: {
+    country: 'South Africa',
+    countryCode: 'ZA',
+    marketplaceId: 'AE08WJ6YKNBMC',
+    salesRegion: AmazonSalesRegionEnum.EUROPE
+  },
+  PL: {
+    country: 'Poland',
+    countryCode: 'PL',
+    marketplaceId: 'A1C3SOZRARQ6R3',
+    salesRegion: AmazonSalesRegionEnum.EUROPE
+  },
+  EG: {
+    country: 'Egypt',
+    countryCode: 'EG',
+    marketplaceId: 'ARBP9OOSHTCHU',
+    salesRegion: AmazonSalesRegionEnum.EUROPE
+  },
+  TR: {
+    country: 'Turkey',
+    countryCode: 'TR',
+    marketplaceId: 'A33AVAJ2PDY3EV',
+    salesRegion: AmazonSalesRegionEnum.EUROPE
+  },
+  SA: {
+    country: 'Saudi Arabia',
+    countryCode: 'SA',
+    marketplaceId: 'A17E79C6D8DWNP',
+    salesRegion: AmazonSalesRegionEnum.EUROPE
+  },
+  AE: {
+    country: 'United Arab Emirates',
+    countryCode: 'AE',
+    marketplaceId: 'A2VIGQ35RCS4UG',
+    salesRegion: AmazonSalesRegionEnum.EUROPE
+  },
+  IN: {
+    country: 'India',
+    countryCode: 'IN',
+    marketplaceId: 'A21TJRUUN4KGV',
+    salesRegion: AmazonSalesRegionEnum.EUROPE
+  },
+  SG: {
+    country: 'Singapore',
+    countryCode: 'SG',
+    marketplaceId: 'A19VAU5U5O7RUS',
+    salesRegion: AmazonSalesRegionEnum.FAR_EAST
+  },
+  AU: {
+    country: 'Australia',
+    countryCode: 'AU',
+    marketplaceId: 'A39IBJ37TRP1C6',
+    salesRegion: AmazonSalesRegionEnum.FAR_EAST
+  },
+  JP: {
+    country: 'Japan',
+    countryCode: 'JP',
+    marketplaceId: 'A1VC38T7YXB528',
+    salesRegion: AmazonSalesRegionEnum.FAR_EAST
+  }
+} as const
