@@ -15,23 +15,17 @@
           clearable
           class="!w-240px"
         >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.TEMU_SHOP_TYPE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
+          <el-option label="请选择字典生成" value="" />
         </el-select>
       </el-form-item>
       <el-form-item label="站点" prop="site">
-        <el-select v-model="queryParams.site" placeholder="请选择站点" clearable class="!w-240px">
-          <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.TEMU_SITE_CODE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+        <el-input
+          v-model="queryParams.site"
+          placeholder="请输入站点"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="店铺名称" prop="shopName">
         <el-input
@@ -74,11 +68,11 @@
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
         <el-button
-          type="danger"
-          plain
-          :disabled="isEmpty(checkedIds)"
-          @click="handleDeleteBatch"
-          v-hasPermi="['temu:shop:delete']"
+            type="danger"
+            plain
+            :disabled="isEmpty(checkedIds)"
+            @click="handleDeleteBatch"
+            v-hasPermi="['temu:shop:delete']"
         >
           <Icon icon="ep:delete" class="mr-5px" /> 批量删除
         </el-button>
@@ -89,25 +83,17 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table
-      row-key="id"
-      v-loading="loading"
-      :data="list"
-      :stripe="true"
-      :show-overflow-tooltip="true"
-      @selection-change="handleRowCheckboxChange"
+        row-key="id"
+        v-loading="loading"
+        :data="list"
+        :stripe="true"
+        :show-overflow-tooltip="true"
+        @selection-change="handleRowCheckboxChange"
     >
-      <el-table-column type="selection" width="55" />
+    <el-table-column type="selection" width="55" />
       <el-table-column label="主键编号" align="center" prop="id" />
-      <el-table-column label="店铺类型" align="center" prop="shopType">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.TEMU_SHOP_TYPE" :value="scope.row.shopType" />
-        </template>
-      </el-table-column>
-      <el-table-column label="站点" align="center" prop="site">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.TEMU_SITE_CODE" :value="scope.row.site" />
-        </template>
-      </el-table-column>
+      <el-table-column label="店铺类型" align="center" prop="shopType" />
+      <el-table-column label="站点" align="center" prop="site" />
       <el-table-column label="店铺名称" align="center" prop="shopName" />
       <el-table-column label="Temu 授权 Token" align="center" prop="authToken" />
       <el-table-column
@@ -152,7 +138,6 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { isEmpty } from '@/utils/is'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
@@ -160,7 +145,7 @@ import { ShopApi, Shop } from '@/api/temu/shop'
 import ShopForm from './ShopForm.vue'
 
 /** Temu 店铺 列表 */
-defineOptions({ name: 'Shop' })
+defineOptions({ name: 'TemuShop' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -227,16 +212,16 @@ const handleDeleteBatch = async () => {
   try {
     // 删除的二次确认
     await message.delConfirm()
-    await ShopApi.deleteShopList(checkedIds.value)
-    checkedIds.value = []
+    await ShopApi.deleteShopList(checkedIds.value);
+    checkedIds.value = [];
     message.success(t('common.delSuccess'))
-    await getList()
+    await getList();
   } catch {}
 }
 
 const checkedIds = ref<number[]>([])
 const handleRowCheckboxChange = (records: Shop[]) => {
-  checkedIds.value = records.map((item) => item.id!)
+  checkedIds.value = records.map((item) => item.id!);
 }
 
 /** 导出按钮操作 */

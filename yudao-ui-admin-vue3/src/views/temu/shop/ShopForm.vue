@@ -4,28 +4,16 @@
       ref="formRef"
       :model="formData"
       :rules="formRules"
-      label-width="140px"
+      label-width="100px"
       v-loading="formLoading"
     >
       <el-form-item label="店铺类型" prop="shopType">
         <el-select v-model="formData.shopType" placeholder="请选择店铺类型">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.TEMU_SHOP_TYPE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
+          <el-option label="请选择字典生成" value="" />
         </el-select>
       </el-form-item>
       <el-form-item label="站点" prop="site">
-        <el-select v-model="formData.site" placeholder="请选择站点">
-          <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.TEMU_SITE_CODE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+        <el-input v-model="formData.site" placeholder="请输入站点" />
       </el-form-item>
       <el-form-item label="店铺名称" prop="shopName">
         <el-input v-model="formData.shopName" placeholder="请输入店铺名称" />
@@ -41,7 +29,6 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { ShopApi, Shop } from '@/api/temu/shop'
 
 /** Temu 店铺 表单 */
@@ -63,7 +50,7 @@ const formData = ref({
 })
 const formRules = reactive({
   shopType: [{ required: true, message: '店铺类型不能为空', trigger: 'change' }],
-  site: [{ required: true, message: '站点不能为空', trigger: 'change' }],
+  site: [{ required: true, message: '站点不能为空', trigger: 'blur' }],
   shopName: [{ required: true, message: '店铺名称不能为空', trigger: 'blur' }],
   authToken: [{ required: true, message: 'Temu 授权 Token不能为空', trigger: 'blur' }]
 })
