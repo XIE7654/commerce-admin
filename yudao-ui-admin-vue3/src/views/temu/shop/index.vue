@@ -36,6 +36,16 @@
           class="!w-240px"
         />
       </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
@@ -96,6 +106,11 @@
       <el-table-column label="站点" align="center" prop="site" />
       <el-table-column label="店铺名称" align="center" prop="shopName" />
       <el-table-column label="Temu 授权 Token" align="center" prop="authToken" />
+      <el-table-column label="状态" align="center" prop="status">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
       <el-table-column
         label="创建时间"
         align="center"
@@ -139,6 +154,7 @@
 
 <script setup lang="ts">
 import { isEmpty } from '@/utils/is'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { ShopApi, Shop } from '@/api/temu/shop'
@@ -159,6 +175,7 @@ const queryParams = reactive({
   shopType: undefined,
   site: undefined,
   shopName: undefined,
+  status: undefined,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单

@@ -8,6 +8,7 @@ export interface Shop {
           site?: string; // Temu 站点代码，例如 US、DE、JP
           shopName?: string; // 店铺名称
           authToken?: string; // Temu 授权 Token
+          status?: number; // 状态：0-启用，1-禁用
   }
 
 // Temu 店铺 API

@@ -21,6 +21,16 @@
       <el-form-item label="Temu 授权 Token" prop="authToken">
         <el-input v-model="formData.authToken" placeholder="请输入Temu 授权 Token" />
       </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="formData.status" clearable placeholder="请选择状态">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -30,6 +40,8 @@
 </template>
 <script setup lang="ts">
 import { ShopApi, Shop } from '@/api/temu/shop'
+import { CommonStatusEnum } from '@/utils/constants'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
 /** Temu 店铺 表单 */
 defineOptions({ name: 'ShopForm' })
@@ -46,13 +58,15 @@ const formData = ref({
   shopType: undefined,
   site: undefined,
   shopName: undefined,
-  authToken: undefined
+  authToken: undefined,
+  status: CommonStatusEnum.ENABLE
 })
 const formRules = reactive({
   shopType: [{ required: true, message: '店铺类型不能为空', trigger: 'change' }],
   site: [{ required: true, message: '站点不能为空', trigger: 'blur' }],
   shopName: [{ required: true, message: '店铺名称不能为空', trigger: 'blur' }],
-  authToken: [{ required: true, message: 'Temu 授权 Token不能为空', trigger: 'blur' }]
+  authToken: [{ required: true, message: 'Temu 授权 Token不能为空', trigger: 'blur' }],
+  status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -105,7 +119,8 @@ const resetForm = () => {
     shopType: undefined,
     site: undefined,
     shopName: undefined,
-    authToken: undefined
+    authToken: undefined,
+    status: CommonStatusEnum.ENABLE
   }
   formRef.value?.resetFields()
 }
