@@ -73,7 +73,7 @@
       <el-table-column label="mallType" align="center" prop="mallType" />
       <el-table-column label="应用订阅状态" align="center" prop="appSubscribeStatus" />
       <el-table-column
-        label="授权过期时间，便于数据库查询"
+        label="授权过期时间"
         align="center"
         prop="expiredAt"
         :formatter="dateFormatter"
