@@ -1,5 +1,4 @@
 import request from '@/config/axios'
-import type { Dayjs } from 'dayjs';
 
 /** Temu 店铺信息 */
 export interface Shop {
@@ -11,8 +10,15 @@ export interface Shop {
           status?: number; // 状态：0-启用，1-禁用
   }
 
+export type ShopSimple = Pick<Shop, 'id' | 'shopName'>
+
 // Temu 店铺 API
 export const ShopApi = {
+  // 查询Temu 店铺精简列表（下拉选项）
+  getShopSimpleList: async (): Promise<ShopSimple[]> => {
+    return await request.get({ url: `/temu/shop/simple-list` })
+  },
+
   // 查询Temu 店铺分页
   getShopPage: async (params: any) => {
     return await request.get({ url: `/temu/shop/page`, params })

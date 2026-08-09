@@ -8,43 +8,43 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="Temu 店铺编号" prop="shopId">
+      <el-form-item label="店铺编号" prop="shopId">
         <el-input
           v-model="queryParams.shopId"
-          placeholder="请输入Temu 店铺编号"
+          placeholder="请输入店铺编号"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="Temu 站点代码，例如 US、DE、JP" prop="site">
+      <el-form-item label="站点代码" prop="site">
         <el-input
           v-model="queryParams.site"
-          placeholder="请输入Temu 站点代码，例如 US、DE、JP"
+          placeholder="站点代码"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="API 分类，例如 product、order" prop="apiCategory">
+      <el-form-item label="API 分类" prop="apiCategory">
         <el-input
           v-model="queryParams.apiCategory"
-          placeholder="请输入API 分类，例如 product、order"
+          placeholder="请输入API 分类"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="Temu OpenAPI 接口 type" prop="operationName">
+      <el-form-item label="接口type" prop="operationName">
         <el-input
           v-model="queryParams.operationName"
-          placeholder="请输入Temu OpenAPI 接口 type"
+          placeholder="OpenAPI 接口 type"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="HTTP 请求方式" prop="requestMethod">
+      <el-form-item label="请求方式" prop="requestMethod">
         <el-input
           v-model="queryParams.requestMethod"
           placeholder="请输入HTTP 请求方式"
@@ -53,7 +53,7 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="脱敏后的完整请求 URL" prop="requestUrl">
+      <el-form-item label="URL" prop="requestUrl">
         <el-input
           v-model="queryParams.requestUrl"
           placeholder="请输入脱敏后的完整请求 URL"
@@ -129,25 +129,25 @@
       <el-table-column label="主键编号" align="center" prop="id" />
       <el-table-column label="本次调用唯一请求编号" align="center" prop="requestId" />
       <el-table-column label="链路追踪编号" align="center" prop="traceId" />
-      <el-table-column label="Temu 店铺编号" align="center" prop="shopId" />
-      <el-table-column label="Temu 站点代码，例如 US、DE、JP" align="center" prop="site" />
-      <el-table-column label="API 分类，例如 product、order" align="center" prop="apiCategory" />
-      <el-table-column label="Temu OpenAPI 接口 type" align="center" prop="operationName" />
-      <el-table-column label="HTTP 请求方式" align="center" prop="requestMethod" />
-      <el-table-column label="脱敏后的完整请求 URL" align="center" prop="requestUrl" />
-      <el-table-column label="请求路径" align="center" prop="requestPath" />
-      <el-table-column label="响应归档文件编号，对应 infra_file.id" align="center" prop="fileId" />
-      <el-table-column label="脱敏后的查询参数或请求体" align="center" prop="requestParams" />
-      <el-table-column label="脱敏后的请求头" align="center" prop="requestHeaders" />
-      <el-table-column label="原始请求体 SHA-256" align="center" prop="requestBodyHash" />
-      <el-table-column label="HTTP 状态码；网络异常时为空" align="center" prop="httpStatusCode" />
-      <el-table-column label="调用结果：0-处理中，1-成功，2-失败" align="center" prop="resultStatus" />
-      <el-table-column label="Temu 或应用错误码" align="center" prop="errorCode" />
+      <el-table-column label="店铺编号" align="center" prop="shopId" />
+      <el-table-column label="站点代码" align="center" prop="site" />
+      <el-table-column label="API 分类" align="center" prop="apiCategory" />
+      <el-table-column label="接口 type" align="center" prop="operationName" />
+      <el-table-column label="请求方式" align="center" prop="requestMethod" />
+<!--      <el-table-column label="完整请求 URL" align="center" prop="requestUrl" />-->
+<!--      <el-table-column label="请求路径" align="center" prop="requestPath" />-->
+      <el-table-column label="文件编号id" align="center" prop="fileId" />
+      <el-table-column label="查询参数或请求体" align="center" prop="requestParams" />
+      <el-table-column label="请求头" align="center" prop="requestHeaders" />
+<!--      <el-table-column label="SHA-256" align="center" prop="requestBodyHash" />-->
+      <el-table-column label="HTTP 状态码" align="center" prop="httpStatusCode" />
+      <el-table-column label="调用结果" align="center" prop="resultStatus" />
+      <el-table-column label="或应用错误码" align="center" prop="errorCode" />
       <el-table-column label="脱敏后的错误信息" align="center" prop="errorMessage" />
-      <el-table-column label="Temu 返回的请求编号" align="center" prop="temuRequestId" />
-      <el-table-column label="Temu 返回的速率限制" align="center" prop="rateLimit" />
-      <el-table-column label="本次调用已重试次数" align="center" prop="retryCount" />
-      <el-table-column label="请求总耗时，单位毫秒" align="center" prop="durationMs" />
+      <el-table-column label="请求编号" align="center" prop="temuRequestId" />
+      <el-table-column label="速率限制" align="center" prop="rateLimit" />
+      <el-table-column label="已重试次数" align="center" prop="retryCount" />
+      <el-table-column label="请求总耗时" align="center" prop="durationMs" />
       <el-table-column
         label="开始请求时间"
         align="center"
@@ -210,7 +210,7 @@ import download from '@/utils/download'
 import { ApiRequestLogApi, ApiRequestLog } from '@/api/temu/apirequestlog'
 import ApiRequestLogForm from './ApiRequestLogForm.vue'
 
-/** Temu OpenAPI 请求调用日志 列表 */
+/** OpenAPI 请求调用日志 列表 */
 defineOptions({ name: 'TemuApiRequestLog' })
 
 const message = useMessage() // 消息弹窗
@@ -277,7 +277,7 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-/** 批量删除Temu OpenAPI 请求调用日志 */
+/** 批量删除OpenAPI 请求调用日志 */
 const handleDeleteBatch = async () => {
   try {
     // 删除的二次确认
@@ -302,7 +302,7 @@ const handleExport = async () => {
     // 发起导出
     exportLoading.value = true
     const data = await ApiRequestLogApi.exportApiRequestLog(queryParams)
-    download.excel(data, 'Temu OpenAPI 请求调用日志.xls')
+    download.excel(data, 'OpenAPI 请求调用日志.xls')
   } catch {
   } finally {
     exportLoading.value = false
