@@ -119,10 +119,11 @@
         <el-button
           type="primary"
           plain
-          @click="openForm('create')"
-          v-hasPermi="['temu:order:create']"
+          :loading="syncLoading"
+          @click="handleSync"
+          v-hasPermi="['temu:order-management:query']"
         >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
+          <Icon icon="ep:refresh" class="mr-5px" /> 同步
         </el-button>
         <el-button
           type="success"
@@ -132,15 +133,6 @@
           v-hasPermi="['temu:order:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
-        <el-button
-            type="danger"
-            plain
-            :disabled="isEmpty(checkedIds)"
-            @click="handleDeleteBatch"
-            v-hasPermi="['temu:order:delete']"
-        >
-          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
         </el-button>
       </el-form-item>
     </el-form>
@@ -154,9 +146,7 @@
         :data="list"
         :stripe="true"
         :show-overflow-tooltip="true"
-        @selection-change="handleRowCheckboxChange"
     >
-    <el-table-column type="selection" width="55" />
       <el-table-column label="主键编号" align="center" prop="id" />
       <el-table-column label="关联 temu_shop.id" align="center" prop="shopId" />
       <el-table-column label="关联 temu_seller.id，由店铺授权关系确定" align="center" prop="sellerId" />
@@ -251,26 +241,6 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" min-width="120px">
-        <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-hasPermi="['temu:order:update']"
-          >
-            编辑
-          </el-button>
-          <el-button
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-            v-hasPermi="['temu:order:delete']"
-          >
-            删除
-          </el-button>
-        </template>
-      </el-table-column>
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -281,22 +251,18 @@
     />
   </ContentWrap>
 
-  <!-- 表单弹窗：添加/修改 -->
-  <OrderForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
-import { isEmpty } from '@/utils/is'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { OrderApi, Order } from '@/api/temu/order'
-import OrderForm from './OrderForm.vue'
+import { ShopApi } from '@/api/temu/shop'
 
 /** Temu 订单 列表 */
 defineOptions({ name: 'TemuOrder' })
 
 const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const list = ref<Order[]>([]) // 列表的数据
@@ -318,6 +284,7 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const syncLoading = ref(false)
 
 /** 查询列表 */
 const getList = async () => {
@@ -343,40 +310,30 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 添加/修改操作 */
-const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
-}
-
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
+/** 从 Temu 拉取当前筛选条件下的订单并同步到本地。 */
+const handleSync = async () => {
+  const { shopId, parentOrderStatus, regionId } = queryParams
+  if (shopId === undefined || parentOrderStatus === undefined || regionId === undefined) {
+    message.warning('请先填写店铺编号、父订单状态和区域编号')
+    return
+  }
+  syncLoading.value = true
   try {
-    // 删除的二次确认
-    await message.delConfirm()
-    // 发起删除
-    await OrderApi.deleteOrder(id)
-    message.success(t('common.delSuccess'))
-    // 刷新列表
+    const shop = await ShopApi.getShop(Number(shopId))
+    await OrderApi.syncOrders({
+      shopId: Number(shopId),
+      site: shop.site,
+      accessToken: shop.authToken,
+      parentOrderStatus: Number(parentOrderStatus),
+      regionId: Number(regionId),
+      pageNumber: 1,
+      pageSize: 100
+    })
+    message.success('订单同步成功')
     await getList()
-  } catch {}
-}
-
-/** 批量删除Temu 订单 */
-const handleDeleteBatch = async () => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    await OrderApi.deleteOrderList(checkedIds.value);
-    checkedIds.value = [];
-    message.success(t('common.delSuccess'))
-    await getList();
-  } catch {}
-}
-
-const checkedIds = ref<number[]>([])
-const handleRowCheckboxChange = (records: Order[]) => {
-  checkedIds.value = records.map((item) => item.id!);
+  } finally {
+    syncLoading.value = false
+  }
 }
 
 /** 导出按钮操作 */

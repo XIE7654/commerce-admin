@@ -86,14 +86,6 @@
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
         <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['temu:api-request-log:create']"
-        >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
-        </el-button>
-        <el-button
           type="success"
           plain
           @click="handleExport"
@@ -102,15 +94,6 @@
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
-        <el-button
-            type="danger"
-            plain
-            :disabled="isEmpty(checkedIds)"
-            @click="handleDeleteBatch"
-            v-hasPermi="['temu:api-request-log:delete']"
-        >
-          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -118,33 +101,30 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table
-        row-key="id"
-        v-loading="loading"
-        :data="list"
-        :stripe="true"
-        :show-overflow-tooltip="true"
-        @selection-change="handleRowCheckboxChange"
+      row-key="id"
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
     >
-    <el-table-column type="selection" width="55" />
       <el-table-column label="主键编号" align="center" prop="id" />
-      <el-table-column label="本次调用唯一请求编号" align="center" prop="requestId" />
-      <el-table-column label="链路追踪编号" align="center" prop="traceId" />
+      <!--      <el-table-column label="本次调用唯一请求编号" align="center" prop="requestId" />-->
+      <!--      <el-table-column label="链路追踪编号" align="center" prop="traceId" />-->
       <el-table-column label="店铺编号" align="center" prop="shopId" />
       <el-table-column label="站点代码" align="center" prop="site" />
       <el-table-column label="API 分类" align="center" prop="apiCategory" />
       <el-table-column label="接口 type" align="center" prop="operationName" />
       <el-table-column label="请求方式" align="center" prop="requestMethod" />
-<!--      <el-table-column label="完整请求 URL" align="center" prop="requestUrl" />-->
-<!--      <el-table-column label="请求路径" align="center" prop="requestPath" />-->
+      <!--      <el-table-column label="完整请求 URL" align="center" prop="requestUrl" />-->
+      <!--      <el-table-column label="请求路径" align="center" prop="requestPath" />-->
       <el-table-column label="文件编号id" align="center" prop="fileId" />
       <el-table-column label="查询参数或请求体" align="center" prop="requestParams" />
       <el-table-column label="请求头" align="center" prop="requestHeaders" />
-<!--      <el-table-column label="SHA-256" align="center" prop="requestBodyHash" />-->
+      <!--      <el-table-column label="SHA-256" align="center" prop="requestBodyHash" />-->
       <el-table-column label="HTTP 状态码" align="center" prop="httpStatusCode" />
       <el-table-column label="调用结果" align="center" prop="resultStatus" />
       <el-table-column label="或应用错误码" align="center" prop="errorCode" />
       <el-table-column label="脱敏后的错误信息" align="center" prop="errorMessage" />
-      <el-table-column label="请求编号" align="center" prop="temuRequestId" />
       <el-table-column label="速率限制" align="center" prop="rateLimit" />
       <el-table-column label="已重试次数" align="center" prop="retryCount" />
       <el-table-column label="请求总耗时" align="center" prop="durationMs" />
@@ -169,26 +149,7 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" min-width="120px">
-        <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-hasPermi="['temu:api-request-log:update']"
-          >
-            编辑
-          </el-button>
-          <el-button
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-            v-hasPermi="['temu:api-request-log:delete']"
-          >
-            删除
-          </el-button>
-        </template>
-      </el-table-column>
+      <el-table-column label="请求编号" align="center" prop="temuRequestId" />
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -204,7 +165,6 @@
 </template>
 
 <script setup lang="ts">
-import { isEmpty } from '@/utils/is'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { ApiRequestLogApi, ApiRequestLog } from '@/api/temu/apirequestlog'
@@ -214,7 +174,6 @@ import ApiRequestLogForm from './ApiRequestLogForm.vue'
 defineOptions({ name: 'TemuApiRequestLog' })
 
 const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const list = ref<ApiRequestLog[]>([]) // 列表的数据
@@ -262,36 +221,6 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    // 发起删除
-    await ApiRequestLogApi.deleteApiRequestLog(id)
-    message.success(t('common.delSuccess'))
-    // 刷新列表
-    await getList()
-  } catch {}
-}
-
-/** 批量删除OpenAPI 请求调用日志 */
-const handleDeleteBatch = async () => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    await ApiRequestLogApi.deleteApiRequestLogList(checkedIds.value);
-    checkedIds.value = [];
-    message.success(t('common.delSuccess'))
-    await getList();
-  } catch {}
-}
-
-const checkedIds = ref<number[]>([])
-const handleRowCheckboxChange = (records: ApiRequestLog[]) => {
-  checkedIds.value = records.map((item) => item.id!);
 }
 
 /** 导出按钮操作 */

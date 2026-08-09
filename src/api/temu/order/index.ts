@@ -44,6 +44,16 @@ export interface Order {
           lastSyncTime: string | Dayjs; // 最近同步时间
   }
 
+export interface OrderSyncReqVO {
+  shopId: number
+  site: string
+  accessToken: string
+  parentOrderStatus: number
+  regionId: number
+  pageNumber: number
+  pageSize: number
+}
+
 // Temu 订单 API
 export const OrderApi = {
   // 查询Temu 订单分页
@@ -51,29 +61,21 @@ export const OrderApi = {
     return await request.get({ url: `/temu/order/page`, params })
   },
 
-  // 查询Temu 订单详情
   getOrder: async (id: number) => {
     return await request.get({ url: `/temu/order/get?id=` + id })
   },
 
-  // 新增Temu 订单
   createOrder: async (data: Order) => {
     return await request.post({ url: `/temu/order/create`, data })
   },
 
-  // 修改Temu 订单
   updateOrder: async (data: Order) => {
     return await request.put({ url: `/temu/order/update`, data })
   },
 
-  // 删除Temu 订单
-  deleteOrder: async (id: number) => {
-    return await request.delete({ url: `/temu/order/delete?id=` + id })
-  },
-
-  /** 批量删除Temu 订单 */
-  deleteOrderList: async (ids: number[]) => {
-    return await request.delete({ url: `/temu/order/delete-list?ids=${ids.join(',')}` })
+  // 从 Temu 拉取订单并同步到本地订单表
+  syncOrders: async (data: OrderSyncReqVO) => {
+    return await request.post({ url: `/temu/order-management/orders/list`, data })
   },
 
   // 导出Temu 订单 Excel
