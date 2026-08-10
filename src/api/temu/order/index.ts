@@ -5,7 +5,6 @@ import type { Dayjs } from 'dayjs';
 export interface Order {
           id: number; // 主键编号
           shopId?: number; // 关联 temu_shop.id
-          sellerId?: number; // 关联 temu_seller.id，由店铺授权关系确定
           parentOrderSn?: string; // Temu 父订单号
           orderSn?: string; // Temu 子订单号
           siteId: number; // Temu 站点编号
@@ -75,7 +74,12 @@ export const OrderApi = {
 
   // 从 Temu 拉取订单并同步到本地订单表
   syncOrders: async (data: OrderSyncReqVO) => {
-    return await request.post({ url: `/temu/order-management/orders/list`, data })
+    return await request.post({ url: `/temu/order/sync`, data })
+  },
+
+  // 同步全部可用 Temu 店铺的订单
+  syncAllAvailableShopOrders: async () => {
+    return await request.post({ url: `/temu/order/sync-all` })
   },
 
   // 导出Temu 订单 Excel

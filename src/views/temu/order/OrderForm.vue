@@ -10,9 +10,6 @@
       <el-form-item label="关联 temu_shop.id" prop="shopId">
         <el-input v-model="formData.shopId" placeholder="请输入关联 temu_shop.id" />
       </el-form-item>
-      <el-form-item label="关联 temu_seller.id，由店铺授权关系确定" prop="sellerId">
-        <el-input v-model="formData.sellerId" placeholder="请输入关联 temu_seller.id，由店铺授权关系确定" />
-      </el-form-item>
       <el-form-item label="Temu 父订单号" prop="parentOrderSn">
         <el-input v-model="formData.parentOrderSn" placeholder="请输入Temu 父订单号" />
       </el-form-item>
@@ -198,7 +195,6 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
   shopId: undefined,
-  sellerId: undefined,
   parentOrderSn: undefined,
   orderSn: undefined,
   siteId: undefined,
@@ -238,7 +234,6 @@ const formData = ref({
 })
 const formRules = reactive({
   shopId: [{ required: true, message: '关联 temu_shop.id不能为空', trigger: 'blur' }],
-  sellerId: [{ required: true, message: '关联 temu_seller.id，由店铺授权关系确定不能为空', trigger: 'blur' }],
   parentOrderSn: [{ required: true, message: 'Temu 父订单号不能为空', trigger: 'blur' }],
   orderSn: [{ required: true, message: 'Temu 子订单号不能为空', trigger: 'blur' }]
 })
@@ -291,7 +286,6 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     shopId: undefined,
-    sellerId: undefined,
     parentOrderSn: undefined,
     orderSn: undefined,
     siteId: undefined,

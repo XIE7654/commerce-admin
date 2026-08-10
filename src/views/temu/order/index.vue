@@ -6,27 +6,24 @@
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="68px"
+      label-width="88px"
     >
-      <el-form-item label="关联 temu_shop.id" prop="shopId">
-        <el-input
+      <el-form-item label="店铺" prop="shopId">
+        <el-select
           v-model="queryParams.shopId"
-          placeholder="请输入关联 temu_shop.id"
+          placeholder="请选择店铺"
           clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
-        />
+        >
+          <el-option
+            v-for="shop in shopList"
+            :key="shop.id"
+            :label="shop.shopName"
+            :value="shop.id"
+          />
+        </el-select>
       </el-form-item>
-      <el-form-item label="关联 temu_seller.id，由店铺授权关系确定" prop="sellerId">
-        <el-input
-          v-model="queryParams.sellerId"
-          placeholder="请输入关联 temu_seller.id，由店铺授权关系确定"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="Temu 父订单号" prop="parentOrderSn">
+      <el-form-item label="父订单号" prop="parentOrderSn">
         <el-input
           v-model="queryParams.parentOrderSn"
           placeholder="请输入Temu 父订单号"
@@ -35,7 +32,7 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="Temu 子订单号" prop="orderSn">
+      <el-form-item label="子订单号" prop="orderSn">
         <el-input
           v-model="queryParams.orderSn"
           placeholder="请输入Temu 子订单号"
@@ -44,7 +41,7 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="Temu 站点编号" prop="siteId">
+      <el-form-item label="站点编号" prop="siteId">
         <el-input
           v-model="queryParams.siteId"
           placeholder="请输入Temu 站点编号"
@@ -53,7 +50,7 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="Temu 区域编号" prop="regionId">
+      <el-form-item label="区域编号" prop="regionId">
         <el-input
           v-model="queryParams.regionId"
           placeholder="请输入Temu 区域编号"
@@ -121,9 +118,18 @@
           plain
           :loading="syncLoading"
           @click="handleSync"
-          v-hasPermi="['temu:order-management:query']"
+          v-hasPermi="['temu:order:update']"
         >
           <Icon icon="ep:refresh" class="mr-5px" /> 同步
+        </el-button>
+        <el-button
+          type="primary"
+          plain
+          :loading="syncAllLoading"
+          @click="handleSyncAll"
+          v-hasPermi="['temu:order:update']"
+        >
+          <Icon icon="ep:refresh" class="mr-5px" /> 同步全部订单
         </el-button>
         <el-button
           type="success"
@@ -149,7 +155,6 @@
     >
       <el-table-column label="主键编号" align="center" prop="id" />
       <el-table-column label="关联 temu_shop.id" align="center" prop="shopId" />
-      <el-table-column label="关联 temu_seller.id，由店铺授权关系确定" align="center" prop="sellerId" />
       <el-table-column label="Temu 父订单号" align="center" prop="parentOrderSn" />
       <el-table-column label="Temu 子订单号" align="center" prop="orderSn" />
       <el-table-column label="Temu 站点编号" align="center" prop="siteId" />
@@ -165,7 +170,17 @@
       <el-table-column label="原始商品名称" align="center" prop="originalGoodsName" />
       <el-table-column label="商品规格" align="center" prop="spec" />
       <el-table-column label="原始商品规格" align="center" prop="originalSpecName" />
-      <el-table-column label="商品缩略图" align="center" prop="thumbUrl" />
+      <el-table-column label="商品缩略图" align="center" width="80">
+        <template #default="{ row }">
+          <img
+            v-if="row.thumbUrl"
+            :src="row.thumbUrl"
+            :alt="row.goodsName"
+            class="h-48px w-48px rounded object-cover"
+          />
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column label="下单数量" align="center" prop="quantity" />
       <el-table-column label="发货前取消数量" align="center" prop="canceledQuantityBeforeShipment" />
       <el-table-column label="原始下单数量" align="center" prop="originalOrderQuantity" />
@@ -257,7 +272,7 @@
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { OrderApi, Order } from '@/api/temu/order'
-import { ShopApi } from '@/api/temu/shop'
+import { ShopApi, ShopSimple } from '@/api/temu/shop'
 
 /** Temu 订单 列表 */
 defineOptions({ name: 'TemuOrder' })
@@ -267,11 +282,11 @@ const message = useMessage() // 消息弹窗
 const loading = ref(true) // 列表的加载中
 const list = ref<Order[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
+const shopList = ref<ShopSimple[]>([])
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   shopId: undefined,
-  sellerId: undefined,
   parentOrderSn: undefined,
   orderSn: undefined,
   siteId: undefined,
@@ -285,6 +300,7 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const syncLoading = ref(false)
+const syncAllLoading = ref(false)
 
 /** 查询列表 */
 const getList = async () => {
@@ -296,6 +312,11 @@ const getList = async () => {
   } finally {
     loading.value = false
   }
+}
+
+/** 查询店铺下拉列表 */
+const getShopList = async () => {
+  shopList.value = await ShopApi.getShopSimpleList()
 }
 
 /** 搜索按钮操作 */
@@ -336,6 +357,20 @@ const handleSync = async () => {
   }
 }
 
+/** 同步所有可用 Temu 店铺的订单。 */
+const handleSyncAll = async () => {
+  try {
+    await message.confirm('确认同步全部可用店铺的订单吗？')
+    syncAllLoading.value = true
+    await OrderApi.syncAllAvailableShopOrders()
+    message.success('全部订单同步成功')
+    await getList()
+  } catch {
+  } finally {
+    syncAllLoading.value = false
+  }
+}
+
 /** 导出按钮操作 */
 const handleExport = async () => {
   try {
@@ -354,5 +389,6 @@ const handleExport = async () => {
 /** 初始化 **/
 onMounted(() => {
   getList()
+  getShopList()
 })
 </script>
