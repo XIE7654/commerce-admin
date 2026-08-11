@@ -22,7 +22,7 @@
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.TEMU_SITE_CODE)"
             :key="dict.value"
-            :label="dict.label"
+            :label="`${dict.label}（${dict.value}）`"
             :value="dict.value"
           />
         </el-select>

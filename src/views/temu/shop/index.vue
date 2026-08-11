@@ -28,7 +28,7 @@
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.TEMU_SITE_CODE)"
             :key="dict.value"
-            :label="dict.label"
+            :label="`${dict.label}（${dict.value}）`"
             :value="dict.value"
           />
         </el-select>
@@ -74,24 +74,24 @@
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['temu:shop:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
-        <el-button
-          type="danger"
-          plain
-          :disabled="isEmpty(checkedIds)"
-          @click="handleDeleteBatch"
-          v-hasPermi="['temu:shop:delete']"
-        >
-          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
-        </el-button>
+<!--        <el-button-->
+<!--          type="success"-->
+<!--          plain-->
+<!--          @click="handleExport"-->
+<!--          :loading="exportLoading"-->
+<!--          v-hasPermi="['temu:shop:export']"-->
+<!--        >-->
+<!--          <Icon icon="ep:download" class="mr-5px" /> 导出-->
+<!--        </el-button>-->
+<!--        <el-button-->
+<!--          type="danger"-->
+<!--          plain-->
+<!--          :disabled="isEmpty(checkedIds)"-->
+<!--          @click="handleDeleteBatch"-->
+<!--          v-hasPermi="['temu:shop:delete']"-->
+<!--        >-->
+<!--          <Icon icon="ep:delete" class="mr-5px" /> 批量删除-->
+<!--        </el-button>-->
       </el-form-item>
     </el-form>
   </ContentWrap>
