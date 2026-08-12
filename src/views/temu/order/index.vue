@@ -9,12 +9,7 @@
       label-width="88px"
     >
       <el-form-item label="店铺" prop="shopId">
-        <el-select
-          v-model="queryParams.shopId"
-          placeholder="请选择店铺"
-          clearable
-          class="!w-240px"
-        >
+        <el-select v-model="queryParams.shopId" placeholder="请选择店铺" clearable class="!w-240px">
           <el-option
             v-for="shop in shopList"
             :key="shop.id"
@@ -147,11 +142,11 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table
-        row-key="id"
-        v-loading="loading"
-        :data="list"
-        :stripe="true"
-        :show-overflow-tooltip="true"
+      row-key="id"
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
     >
       <el-table-column label="主键编号" align="center" prop="id" />
       <el-table-column label="关联 temu_shop.id" align="center" prop="shopId" />
@@ -182,10 +177,18 @@
         </template>
       </el-table-column>
       <el-table-column label="下单数量" align="center" prop="quantity" />
-      <el-table-column label="发货前取消数量" align="center" prop="canceledQuantityBeforeShipment" />
+      <el-table-column
+        label="发货前取消数量"
+        align="center"
+        prop="canceledQuantityBeforeShipment"
+      />
       <el-table-column label="原始下单数量" align="center" prop="originalOrderQuantity" />
       <el-table-column label="父订单发货方式" align="center" prop="shippingMethod" />
-      <el-table-column label="是否由主商城合单发货" align="center" prop="shipmentConsolidatedByMainMall" />
+      <el-table-column
+        label="是否由主商城合单发货"
+        align="center"
+        prop="shipmentConsolidatedByMainMall"
+      />
       <el-table-column label="是否含运费" align="center" prop="hasShippingFee" />
       <el-table-column
         label="父订单创建时间"
@@ -238,7 +241,11 @@
       />
       <el-table-column label="父订单标签 JSON" align="center" prop="parentOrderLabels" />
       <el-table-column label="子订单标签 JSON" align="center" prop="orderLabels" />
-      <el-table-column label="父订单履约预警 JSON" align="center" prop="parentFulfillmentWarnings" />
+      <el-table-column
+        label="父订单履约预警 JSON"
+        align="center"
+        prop="parentFulfillmentWarnings"
+      />
       <el-table-column label="子订单履约预警 JSON" align="center" prop="fulfillmentWarnings" />
       <el-table-column label="包裹异常类型 JSON" align="center" prop="packageAbnormalTypes" />
       <el-table-column label="商品映射列表 JSON" align="center" prop="productList" />
@@ -256,6 +263,28 @@
         :formatter="dateFormatter"
         width="180px"
       />
+      <el-table-column label="操作" align="center" fixed="right" width="180px">
+        <template #default="{ row }">
+          <el-button
+            link
+            type="primary"
+            :loading="syncingOrderId === row.id && syncingType === 'detail'"
+            @click="handleSyncOrderDetail(row)"
+            v-hasPermi="['temu:order:update']"
+          >
+            同步详情
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            :loading="syncingOrderId === row.id && syncingType === 'shipping-info'"
+            @click="handleSyncOrderShippingInfo(row)"
+            v-hasPermi="['temu:order:update']"
+          >
+            同步收货
+          </el-button>
+        </template>
+      </el-table-column>
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -265,7 +294,6 @@
       @pagination="getList"
     />
   </ContentWrap>
-
 </template>
 
 <script setup lang="ts">
@@ -301,6 +329,8 @@ const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const syncLoading = ref(false)
 const syncAllLoading = ref(false)
+const syncingOrderId = ref<number | undefined>()
+const syncingType = ref<'detail' | 'shipping-info' | undefined>()
 
 /** 查询列表 */
 const getList = async () => {
@@ -368,6 +398,34 @@ const handleSyncAll = async () => {
   } catch {
   } finally {
     syncAllLoading.value = false
+  }
+}
+
+/** 同步当前订单对应的 Temu 父订单详情。 */
+const handleSyncOrderDetail = async (row: Order) => {
+  syncingOrderId.value = row.id
+  syncingType.value = 'detail'
+  try {
+    await OrderApi.syncOrderDetail({ orderId: row.id })
+    message.success('订单详情同步成功')
+    await getList()
+  } finally {
+    syncingOrderId.value = undefined
+    syncingType.value = undefined
+  }
+}
+
+/** 同步当前订单对应的 Temu 收货信息。 */
+const handleSyncOrderShippingInfo = async (row: Order) => {
+  syncingOrderId.value = row.id
+  syncingType.value = 'shipping-info'
+  try {
+    await OrderApi.syncOrderShippingInfo({ orderId: row.id })
+    message.success('订单收货信息同步成功')
+    await getList()
+  } finally {
+    syncingOrderId.value = undefined
+    syncingType.value = undefined
   }
 }
 
