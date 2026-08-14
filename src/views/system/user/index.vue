@@ -373,6 +373,10 @@ const handleResetPwd = async (row: UserApi.UserVO) => {
       t('common.reminder')
     )
     const password = result.value
+    if (password.length < 12 || !/[^A-Za-z0-9]/.test(password)) {
+      message.error('密码必须为 12-128 位且包含特殊字符')
+      return
+    }
     // 发起重置
     await UserApi.resetUserPassword(row.id, password)
     message.success('修改成功，新密码是：' + password)

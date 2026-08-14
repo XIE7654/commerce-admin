@@ -11,6 +11,19 @@ export interface SmsLoginVO {
   code: string
 }
 
+export interface TotpSetupVO {
+  secret: string
+  otpauthUri: string
+  qrCode: string
+}
+
+export interface TotpConfirmVO {
+  username: string
+  password: string
+  secret: string
+  code: string
+}
+
 // 登录
 export const login = (data: UserLoginVO) => {
   return request.post({
@@ -19,6 +32,24 @@ export const login = (data: UserLoginVO) => {
     headers: {
       isEncrypt: false
     }
+  })
+}
+
+/** 生成认证器绑定二维码。 */
+export const setupTotp = (data: Pick<UserLoginVO, 'username' | 'password'>, tenantId?: number) => {
+  return request.post<TotpSetupVO>({
+    url: '/system/auth/totp/setup',
+    data,
+    headers: tenantId ? { 'tenant-id': tenantId } : undefined
+  })
+}
+
+/** 校验首次认证器动态码并启用 TOTP。 */
+export const confirmTotp = (data: TotpConfirmVO, tenantId?: number) => {
+  return request.post({
+    url: '/system/auth/totp/confirm',
+    data,
+    headers: tenantId ? { 'tenant-id': tenantId } : undefined
   })
 }
 

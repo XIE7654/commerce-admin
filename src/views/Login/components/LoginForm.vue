@@ -47,6 +47,34 @@
           />
         </el-form-item>
       </el-col>
+      <el-col v-if="!totpSetup" :span="24" class="px-10px">
+        <el-form-item prop="mfaCode">
+          <el-input
+            v-model="loginData.loginForm.mfaCode"
+            placeholder="请输入认证器动态验证码"
+            :prefix-icon="iconCircleCheck"
+            @keyup.enter="getCode()"
+          />
+        </el-form-item>
+      </el-col>
+      <el-col v-if="totpSetup" :span="24" class="px-10px">
+        <el-form-item>
+          <div class="w-full text-center">
+            <img :src="totpSetup.qrCode" alt="TOTP 认证器二维码" class="h-180px w-180px" />
+            <div class="mt-8px break-all text-xs text-gray-500">{{ totpSetup.secret }}</div>
+          </div>
+        </el-form-item>
+      </el-col>
+      <el-col v-if="totpSetup" :span="24" class="px-10px">
+        <el-form-item prop="mfaCode">
+          <el-input
+            v-model="loginData.loginForm.mfaCode"
+            placeholder="输入认证器显示的 6 位验证码以完成绑定"
+            :prefix-icon="iconCircleCheck"
+            @keyup.enter="confirmTotp"
+          />
+        </el-form-item>
+      </el-col>
       <el-col :span="24" class="px-10px mt-[-20px] mb-[-20px]">
         <el-form-item>
           <el-row justify="space-between" style="width: 100%">
@@ -69,10 +97,20 @@
       </el-col>
       <el-col :span="24" class="px-10px">
         <el-form-item>
-          <el-button :loading="loginLoading" class="w-full" type="primary" @click="getCode()">
-            {{ t('login.login') }}
+          <el-button
+            :loading="loginLoading"
+            class="w-full"
+            type="primary"
+            @click="totpSetup ? confirmTotp() : getCode()"
+          >
+            {{ totpSetup ? '确认绑定认证器' : t('login.login') }}
           </el-button>
         </el-form-item>
+      </el-col>
+      <el-col :span="24" class="px-10px text-center">
+        <el-link type="primary" @click="totpSetup ? cancelTotpSetup() : beginTotpSetup()">
+          {{ totpSetup ? '返回登录' : '首次使用？绑定认证器' }}
+        </el-link>
       </el-col>
       <Verify
         v-if="loginData.captchaEnable === 'true'"
@@ -82,58 +120,21 @@
         mode="pop"
         @success="handleLogin"
       />
-      <el-col :span="24" class="px-10px">
-        <el-form-item>
-          <el-row :gutter="5" justify="space-between" style="width: 100%">
-            <el-col :span="8">
-              <el-button class="w-full" @click="setLoginState(LoginStateEnum.MOBILE)">
-                {{ t('login.btnMobile') }}
-              </el-button>
-            </el-col>
-            <el-col :span="8">
-              <el-button class="w-full" @click="setLoginState(LoginStateEnum.QR_CODE)">
-                {{ t('login.btnQRCode') }}
-              </el-button>
-            </el-col>
-            <el-col :span="8">
-              <el-button class="w-full" @click="setLoginState(LoginStateEnum.REGISTER)">
-                {{ t('login.btnRegister') }}
-              </el-button>
-            </el-col>
-          </el-row>
-        </el-form-item>
-      </el-col>
-      <el-divider content-position="center">{{ t('login.otherLogin') }}</el-divider>
-      <el-col :span="24" class="px-10px">
-        <el-form-item>
-          <div class="w-full flex justify-between">
-            <Icon
-              v-for="(item, key) in socialList"
-              :key="key"
-              :icon="item.icon"
-              :size="30"
-              class="anticon cursor-pointer"
-              color="#999"
-              @click="doSocialLogin(item.type)"
-            />
-          </div>
-        </el-form-item>
-      </el-col>
-      <el-divider content-position="center">萌新必读</el-divider>
-      <el-col :span="24" class="px-10px">
-        <el-form-item>
-          <div class="w-full flex justify-between">
-            <el-link href="https://doc.iocoder.cn/" target="_blank">📚开发指南</el-link>
-            <el-link href="https://doc.iocoder.cn/video/" target="_blank">🔥视频教程</el-link>
-            <el-link href="https://www.iocoder.cn/Interview/good-collection/" target="_blank">
-              ⚡面试手册
-            </el-link>
-            <el-link href="http://static.yudao.iocoder.cn/mp/Aix9975.jpeg" target="_blank">
-              🤝外包咨询
-            </el-link>
-          </div>
-        </el-form-item>
-      </el-col>
+<!--      <el-divider content-position="center">萌新必读</el-divider>-->
+<!--      <el-col :span="24" class="px-10px">-->
+<!--        <el-form-item>-->
+<!--          <div class="w-full flex justify-between">-->
+<!--            <el-link href="https://doc.iocoder.cn/" target="_blank">📚开发指南</el-link>-->
+<!--            <el-link href="https://doc.iocoder.cn/video/" target="_blank">🔥视频教程</el-link>-->
+<!--            <el-link href="https://www.iocoder.cn/Interview/good-collection/" target="_blank">-->
+<!--              ⚡面试手册-->
+<!--            </el-link>-->
+<!--            <el-link href="http://static.yudao.iocoder.cn/mp/Aix9975.jpeg" target="_blank">-->
+<!--              🤝外包咨询-->
+<!--            </el-link>-->
+<!--          </div>-->
+<!--        </el-form-item>-->
+<!--      </el-col>-->
     </el-row>
   </el-form>
 </template>
@@ -156,6 +157,7 @@ const message = useMessage()
 const iconHouse = useIcon({ icon: 'ep:house' })
 const iconAvatar = useIcon({ icon: 'ep:avatar' })
 const iconLock = useIcon({ icon: 'ep:lock' })
+const iconCircleCheck = useIcon({ icon: 'ep:circle-check' })
 const formLogin = ref()
 const { validForm } = useFormValid(formLogin)
 const { setLoginState, getLoginState } = useLoginState()
@@ -165,13 +167,15 @@ const redirect = ref<string>('')
 const loginLoading = ref(false)
 const verify = ref()
 const captchaType = ref('blockPuzzle') // blockPuzzle 滑块 clickWord 点击文字 pictureWord 文字验证码
+const totpSetup = ref<LoginApi.TotpSetupVO>()
 
 const getShow = computed(() => unref(getLoginState) === LoginStateEnum.LOGIN)
 
 const LoginRules = {
   tenantName: [required],
   username: [required],
-  password: [required]
+  password: [required],
+  mfaCode: [required]
 }
 const loginData = reactive({
   isShowPassword: false,
@@ -181,17 +185,11 @@ const loginData = reactive({
     tenantName: import.meta.env.VITE_APP_DEFAULT_LOGIN_TENANT || '',
     username: import.meta.env.VITE_APP_DEFAULT_LOGIN_USERNAME || '',
     password: import.meta.env.VITE_APP_DEFAULT_LOGIN_PASSWORD || '',
+    mfaCode: '',
     captchaVerification: '',
     rememberMe: true // 默认记录我。如果不需要，可手动修改
   }
 })
-
-const socialList = [
-  { icon: 'ant-design:wechat-filled', type: 30 },
-  { icon: 'ant-design:dingtalk-circle-filled', type: 20 },
-  { icon: 'ant-design:github-filled', type: 0 },
-  { icon: 'ant-design:alipay-circle-filled', type: 0 }
-]
 
 // 获取验证码
 const getCode = async () => {
@@ -204,12 +202,65 @@ const getCode = async () => {
     verify.value.show()
   }
 }
+
+/** 使用账号密码生成认证器二维码，首次绑定不要求已登录会话。 */
+const beginTotpSetup = async () => {
+  const valid = await formLogin.value.validateField(['username', 'password']).then(() => true).catch(() => false)
+  if (!valid) return
+  const tenantId = await getTenantId()
+  loginLoading.value = true
+  try {
+    totpSetup.value = await LoginApi.setupTotp(
+      { username: loginData.loginForm.username, password: loginData.loginForm.password },
+      tenantId
+    )
+    loginData.loginForm.mfaCode = ''
+  } finally {
+    loginLoading.value = false
+  }
+}
+
+/** 使用认证器的首次动态码确认绑定。 */
+const confirmTotp = async () => {
+  if (!totpSetup.value || !loginData.loginForm.mfaCode) {
+    message.error('请输入认证器显示的 6 位验证码')
+    return
+  }
+  loginLoading.value = true
+  try {
+    const tenantId = await getTenantId()
+    await LoginApi.confirmTotp(
+      {
+        username: loginData.loginForm.username,
+        password: loginData.loginForm.password,
+        secret: totpSetup.value.secret,
+        code: loginData.loginForm.mfaCode
+      },
+      tenantId
+    )
+    message.success('认证器绑定成功，请使用动态验证码登录')
+    totpSetup.value = undefined
+  } finally {
+    loginLoading.value = false
+  }
+}
+
+const cancelTotpSetup = () => {
+  totpSetup.value = undefined
+  loginData.loginForm.mfaCode = ''
+}
 // 获取租户 ID
-const getTenantId = async () => {
+const getTenantId = async (): Promise<number | undefined> => {
   if (loginData.tenantEnable === 'true') {
     const res = await LoginApi.getTenantIdByName(loginData.loginForm.tenantName)
+    if (!res) {
+      message.error('租户不存在或已停用，请检查租户名称')
+      throw new Error('租户不存在或已停用')
+    }
     authUtil.setTenantId(res)
+    return res
   }
+  return undefined
 }
 // 记住我
 const getLoginFormCache = () => {
@@ -224,6 +275,7 @@ const getLoginFormCache = () => {
     }
   }
 }
+
 // 根据域名，获得租户信息
 const getTenantByWebsite = async () => {
   if (loginData.tenantEnable === 'true') {
@@ -257,7 +309,9 @@ const handleLogin = async (params: any) => {
       background: 'rgba(0, 0, 0, 0.7)'
     })
     if (loginDataLoginForm.rememberMe) {
-      authUtil.setLoginForm(loginDataLoginForm)
+      // 一次性验证码不可写入浏览器存储，只保留账号、密码和 MFA 手机号。
+      const { mfaCode, ...loginFormToCache } = loginDataLoginForm
+      authUtil.setLoginForm(loginFormToCache)
     } else {
       authUtil.removeLoginForm()
     }
@@ -277,41 +331,6 @@ const handleLogin = async (params: any) => {
   }
 }
 
-// 社交登录
-const doSocialLogin = async (type: number) => {
-  if (type === 0) {
-    message.error('此方式未配置')
-  } else {
-    loginLoading.value = true
-    if (loginData.tenantEnable === 'true') {
-      // 尝试先通过 tenantName 获取租户
-      await getTenantId()
-      // 如果获取不到，则需要弹出提示，进行处理
-      if (!authUtil.getTenantId()) {
-        try {
-          const data = await message.prompt('请输入租户名称', t('common.reminder'))
-          if (data?.action !== 'confirm') throw 'cancel'
-          const res = await LoginApi.getTenantIdByName(data.value)
-          authUtil.setTenantId(res)
-        } catch (error) {
-          if (error === 'cancel') return
-        } finally {
-          loginLoading.value = false
-        }
-      }
-    }
-    // 计算 redirectUri
-    // 注意: type、redirect 需要先 encode 一次，否则钉钉回调会丢失。
-    // 配合 social-login.vue#getUrlValue() 使用
-    const redirectUri =
-      location.origin +
-      '/social-login?' +
-      encodeURIComponent(`type=${type}&redirect=${redirect.value || '/'}`)
-
-    // 进行跳转
-    window.location.href = await LoginApi.socialAuthRedirect(type, encodeURIComponent(redirectUri))
-  }
-}
 watch(
   () => currentRoute.value,
   (route: RouteLocationNormalizedLoaded) => {

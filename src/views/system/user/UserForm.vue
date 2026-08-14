@@ -130,7 +130,10 @@ const formData = ref({
 const formRules = reactive<FormRules>({
   username: [{ required: true, message: '用户名称不能为空', trigger: 'blur' }],
   nickname: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }],
-  password: [{ required: true, message: '用户密码不能为空', trigger: 'blur' }],
+  password: [
+    { required: true, min: 12, max: 128, message: '密码至少 12 个字符且必须包含特殊字符', trigger: 'blur' },
+    { pattern: /[^A-Za-z0-9]/, message: '密码至少 12 个字符且必须包含特殊字符', trigger: 'blur' }
+  ],
   email: [
     {
       type: 'email',

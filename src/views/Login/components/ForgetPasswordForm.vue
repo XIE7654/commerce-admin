@@ -149,17 +149,22 @@ const validatePass2 = (_rule, value) => {
   return Promise.resolve()
 }
 
+const validatePasswordPolicy = (_rule, value) => {
+  if (value.length < 12 || value.length > 128 || !/[^A-Za-z0-9]/.test(value)) {
+    return Promise.reject(new Error('密码至少 12 个字符且必须包含特殊字符'))
+  }
+  return Promise.resolve()
+}
+
 const rules = {
   tenantName: [{ required: true, min: 2, max: 20, trigger: 'blur', message: '长度为4到16位' }],
   mobile: [{ required: true, min: 11, max: 11, trigger: 'blur', message: '手机号长度为11位' }],
   password: [
     {
       required: true,
-      min: 4,
-      max: 16,
-      validator: validatePass2,
+      validator: validatePasswordPolicy,
       trigger: 'blur',
-      message: '密码长度为4到16位'
+      message: '密码至少 12 个字符且必须包含特殊字符'
     }
   ],
   check_password: [{ required: true, validator: validatePass2, trigger: 'blur' }],
